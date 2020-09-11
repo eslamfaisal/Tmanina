@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "983264411275",
+    "firebase_url": "https://tmanina-fd5d8.firebaseio.com",
+    "project_id": "tmanina-fd5d8",
+    "storage_bucket": "tmanina-fd5d8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983264411275:android:9a5d512094ba072bca9e8e",
+        "android_client_info": {
+          "package_name": "com.tmanina"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983264411275-uq6ppsbo0s7s3ftn3s7943la7fcqchvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtsWSdNs0LpFgfDl0KTbPfzo5iAIN27YE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983264411275-uq6ppsbo0s7s3ftn3s7943la7fcqchvh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
