@@ -1,153 +1,429 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-void main() {
-  runApp(MyApp());
-}
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Firebase.initializeApp();
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: ThemeData.dark(),
+      initialRoute: MyHomePage.id,
+      routes: {
+        MyHomePage.id: (context) => MyHomePage(),
+        Registration.id: (context) => Registration(),
+        Login.id: (context) => Login(),
+        Chat.id: (context) => Chat(),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class MyHomePage extends StatelessWidget {
+  static const String id = "HOMESCREEN";
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Hero(
+                tag: 'logo',
+                child: Container(
+                  width: 100.0,
+                  child: Image.asset("assets/images/logo.png"),
+                ),
+              ),
+              Text(
+                "Tensor Chat",
+                style: TextStyle(
+                  fontSize: 40.0,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 50.0,
+          ),
+          CustomButton(
+            text: "Log In",
+            callback: () {
+              Navigator.of(context).pushNamed(Login.id);
+            },
+          ),
+          CustomButton(
+            text: "Register",
+            callback: () {
+              Navigator.of(context).pushNamed(Registration.id);
+            },
+          )
+        ],
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class CustomButton extends StatelessWidget {
+  final VoidCallback callback;
+  final String text;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  const CustomButton({Key key, this.callback, this.text}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Material(
+        color: Colors.blueGrey,
+        elevation: 6.0,
+        borderRadius: BorderRadius.circular(30.0),
+        child: MaterialButton(
+          onPressed: callback,
+          minWidth: 200.0,
+          height: 45.0,
+          child: Text(text),
+        ),
+      ),
+    );
+  }
+}
+
+class Registration extends StatefulWidget {
+  static const String id = "REGISTRATION";
+  @override
+  _RegistrationState createState() => _RegistrationState();
+}
+
+class _RegistrationState extends State<Registration> {
+  String email;
+  String password;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> registerUser() async {
+    UserCredential user = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chat(
+          user: user.user,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("Tensor Chat"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: Hero(
+              tag: 'logo',
+              child: Container(
+                child: Image.asset(
+                  "assets/images/logo.png",
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          TextField(
+            keyboardType: TextInputType.emailAddress,
+            onChanged: (value) => email = value,
+            decoration: InputDecoration(
+              hintText: "Enter Your Email...",
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          TextField(
+            autocorrect: false,
+            obscureText: true,
+            onChanged: (value) => password = value,
+            decoration: InputDecoration(
+              hintText: "Enter Your Password...",
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          CustomButton(
+            text: "Register",
+            callback: () async {
+              await registerUser();
+            },
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class Login extends StatefulWidget {
+  static const String id = "LOGIN";
+  @override
+  _LoginState createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  String email;
+  String password;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> loginUser() async {
+    UserCredential user = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Chat(
+          user: user.user,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tensor Chat"),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: Hero(
+              tag: 'logo',
+              child: Container(
+                child: Image.asset(
+                  "assets/images/logo.png",
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          TextField(
+            keyboardType: TextInputType.emailAddress,
+            onChanged: (value) => email = value,
+            decoration: InputDecoration(
+              hintText: "Enter Your Email...",
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          TextField(
+            autocorrect: false,
+            obscureText: true,
+            onChanged: (value) => password = value,
+            decoration: InputDecoration(
+              hintText: "Enter Your Password...",
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          CustomButton(
+            text: "Log In",
+            callback: () async {
+              await loginUser();
+            },
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class Chat extends StatefulWidget {
+  static const String id = "CHAT";
+  final User user;
+
+  const Chat({Key key, this.user}) : super(key: key);
+  @override
+  _ChatState createState() => _ChatState();
+}
+
+class _ChatState extends State<Chat> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  TextEditingController messageController = TextEditingController();
+  ScrollController scrollController = ScrollController();
+
+  Future<void> callback() async {
+    if (messageController.text.length > 0) {
+      await _firestore.collection('messages').add({
+        'text': messageController.text,
+        'from': widget.user.email,
+        'date': DateTime.now().toIso8601String().toString(),
+      });
+      messageController.clear();
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: Hero(
+          tag: 'logo',
+          child: Container(
+            height: 40.0,
+            child: Image.asset("assets/images/logo.png"),
+          ),
+        ),
+        title: Text("Tensor Chat"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () {
+              _auth.signOut();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          )
+        ],
+      ),
+      body: SafeArea(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('messages')
+                    .orderBy('date')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+
+                  List<DocumentSnapshot> docs = snapshot.data.documents;
+
+                  List<Widget> messages = docs
+                      .map((doc) => Message(
+                    from: doc.data()['from'],
+                    text: doc.data()['text'],
+                    me: widget.user.email == doc.data()['from'],
+                  ))
+                      .toList();
+
+                  return ListView(
+                    controller: scrollController,
+                    children: <Widget>[
+                      ...messages,
+                    ],
+                  );
+                },
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            Container(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      onSubmitted: (value) => callback(),
+                      decoration: InputDecoration(
+                        hintText: "Enter a Message...",
+                        border: const OutlineInputBorder(),
+                      ),
+                      controller: messageController,
+                    ),
+                  ),
+                  SendButton(
+                    text: "Send",
+                    callback: callback,
+                  )
+                ],
+              ),
             ),
-            AddUser('eslam faisal','urgent',22)
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
-// Import the firebase_core and cloud_firestore plugin
 
+class SendButton extends StatelessWidget {
+  final String text;
+  final VoidCallback callback;
 
-class AddUser extends StatelessWidget {
-  final String fullName;
-  final String company;
-  final int age;
+  const SendButton({Key key, this.text, this.callback}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      color: Colors.orange,
+      onPressed: callback,
+      child: Text(text),
+    );
+  }
+}
 
-  AddUser(this.fullName, this.company, this.age);
+class Message extends StatelessWidget {
+  final String from;
+  final String text;
+
+  final bool me;
+
+  const Message({Key key, this.from, this.text, this.me}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Create a CollectionReference called users that references the firestore collection
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-    Future<void> addUser() {
-      // Call the user's CollectionReference to add a new user
-      return users
-          .add({
-        'full_name': fullName, // John Doe
-        'company': company, // Stokes and Sons
-        'age': age // 42
-      })
-          .then((value) => print("User Added"))
-          .catchError((error) => print("Failed to add user: $error"));
-    }
-
-    return FlatButton(
-      onPressed: addUser,
-      child: Text(
-        "Add User",
+    return Container(
+      child: Column(
+        crossAxisAlignment:
+        me ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            from,
+          ),
+          Material(
+            color: me ? Colors.teal : Colors.red,
+            borderRadius: BorderRadius.circular(10.0),
+            elevation: 6.0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+              child: Text(
+                text,
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
